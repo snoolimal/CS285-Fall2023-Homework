@@ -98,7 +98,7 @@ class MLPPolicySL(BasePolicy, nn.Module):
             lr=self.learning_rate
         )
 
-        # sef loss func -- i.e., objective func --
+        # set loss func -- i.e., objective func --
         self.criterion = nn.MSELoss()
 
     def get_action(self, ob: np.ndarray) -> np.ndarray:
