@@ -1,8 +1,8 @@
-import itertools
-from pathlib import Path
 from typing import Union
 
+import itertools
 import numpy as np
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -82,21 +82,6 @@ class MLPPolicySL(BasePolicy, nn.Module):
 
         self.criterion = nn.MSELoss()
 
-    def forward(self, observations: torch.FloatTensor) -> torch.Tensor:
-        """
-        Args:
-            observations: batch observation         | [N,ob_dim]
-        ---
-        Returns:
-            action_pred: batch actions prediction   | [N,ac_dim]
-        """
-        mean = self.mean_net(observations)  # N개의 training points 각각에 대응하는 mean vector  | [N,ac_dim]
-        std = torch.exp(self.logstd)        # N개의 training points에 공통적으로 사용하는 cov max의 diag     | [ac_dim,]
-        dist = MultivariateNormal(mean, scale_tril=torch.diag(std))     # 여기까진 문제없이 computation graph가 연결
-
-        actions_pred = dist.rsample()    # reparameterization trick으로 computation graph 연결 유지
-        return actions_pred
-
     def update(self, observations: np.ndarray, actions: np.ndarray, **kwargs) -> dict:
         """
         Args:
@@ -118,6 +103,21 @@ class MLPPolicySL(BasePolicy, nn.Module):
             'Training Loss': loss.item()
         }
 
+    def forward(self, observations: torch.FloatTensor) -> torch.Tensor:
+        """
+        Args:
+            observations: batch observation         | [N,ob_dim]
+        ---
+        Returns:
+            action_pred: batch actions prediction   | [N,ac_dim]
+        """
+        mean = self.mean_net(observations)  # N개의 training points 각각에 대응하는 mean vector  | [N,ac_dim]
+        std = torch.exp(self.logstd)        # N개의 training points에 공통적으로 사용하는 cov max의 diag     | [ac_dim,]
+        dist = MultivariateNormal(mean, scale_tril=torch.diag(std))     # 여기까진 문제없이 computation graph가 연결
+
+        actions_pred = dist.rsample()    # reparameterization trick으로 computation graph 연결 유지
+        return actions_pred
+
     def get_action(self, ob: np.ndarray) -> np.ndarray:
         """
         Args:
@@ -132,3 +132,23 @@ class MLPPolicySL(BasePolicy, nn.Module):
     def save(self, filepath: Union[str, Path]):
         if isinstance(filepath, Path): filepath = str(filepath)
         torch.save(self.state_dict(), filepath)
+
+
+# --- MultivariateNormal(mean, scale_tril=torch.diag(std)) vs. Normal(mean, std)
+# mean[N,ac_dim], std[ac_dim,]을 gaussian distribution parameter로 exploit할 수 있는 2가지 옵션이 있다.
+#
+# 1. Normal(mean, std)    | [N,ac_dim]
+# N*ac_dim개의 독립적인, i.e.,각 data point에 대해 독립적인 ac_dim개의 univariate gaussian을 모든 data point에서 생성한다.
+# ac_dim의 각 차원은 독립적이다.
+#
+# 2. MultivariateNormal(mean, scale_tril=torch.diag(std))     | [N,ac_dim]
+# N개의 독립적인 ac_dim차원, i.e., 각 data point에 대해 독립적인 ac_dim차원 multivariate gaussian을 생성한다.
+# Univariate 대신 multivariate gaussian을 도입한다는 건 cov mat로 ac_dim의 각 차원 사이의 correlation을 고려함을 뜻한다.
+#
+# 다만 여기선 'torch.diag(std)'로 cov mat를 diag mat를 사용함으로써 ac_dim의 차원 간 독립을 가정했다.
+# 그러나 두 distribution이 수학적으로 완전히 동일한 object는 아니다.
+# Multivariate gaussian을 사용하면 각 data point는 ac_dim차원의 단일 vector이므로, 이 vector는 joint distribution의 sample이다.
+# 이때 여기에선 cov mat로 diag mat를 사용했기에 joint distribution이 개별 gaussian의 곱으로 factorize될 뿐이다.
+# 반면, univariate guassian을 사용하면 ac_dim차원의 각 data point vector는
+# 차원별로 독립적인 ac_dim개의 univariate gaussian으로부터의 samples로 구성된다.
+# ---
