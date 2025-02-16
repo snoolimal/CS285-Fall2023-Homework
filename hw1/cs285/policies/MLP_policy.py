@@ -94,8 +94,8 @@ class MLPPolicySL(BasePolicy, nn.Module):
         actions_expert = ptu.to_tensor(actions)
 
         self.optimizer.zero_grad()
-        actions_pred = self.forward(observations)
-        loss = self.criterion(actions_pred, actions_expert)
+        actions = self.forward(observations)
+        loss = self.criterion(actions, actions_expert)
         loss.backward()
         self.optimizer.step()
 
@@ -115,8 +115,8 @@ class MLPPolicySL(BasePolicy, nn.Module):
         std = torch.exp(self.logstd)        # N개의 training points에 공통적으로 사용하는 cov max의 diag     | [ac_dim,]
         dist = MultivariateNormal(mean, scale_tril=torch.diag(std))     # 여기까진 문제없이 computation graph가 연결
 
-        actions_pred = dist.rsample()    # reparameterization trick으로 computation graph 연결 유지
-        return actions_pred
+        actions = dist.rsample()    # reparameterization trick으로 computation graph 연결 유지
+        return actions
 
     def get_action(self, ob: np.ndarray) -> np.ndarray:
         """
@@ -126,7 +126,7 @@ class MLPPolicySL(BasePolicy, nn.Module):
         Returns:
             ac: single action       | [ac_dim]
         """
-        ac = self.forward(ptu.to_tensor(ob))
+        ac = self.forward(ptu.to_tensor(ob.reshape(1, *ob.shape)))  # batch form으로
         return ptu.to_numpy(ac)
 
     def save(self, filepath: Union[str, Path]):

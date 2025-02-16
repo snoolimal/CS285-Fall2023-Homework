@@ -112,14 +112,14 @@ def run_training_loop(params):
                 # batch observation의 temporal context는 labeling에 고려하지 않는다.
                 # ---
         total_envsteps += envsteps_this_batch
-        replay_buffer.add_rollouts(trajs)
+        replay_buffer.add_rollouts(trajs)       # add collected transitions to replay buffer
 
         ## Training Agent
         print('\nTraining agent using sampled data from replay buffer...')
         training_logs = []
         for _ in range(params['num_agent_train_steps_per_iter']):
             # sample transitions from replay buffer (imitation learning은 observation과 action만 필요)
-            indices = np.random.permutation(len(replay_buffer.observations))[:params['train_batch_size']]
+            indices = np.random.permutation(len(replay_buffer))[:params['train_batch_size']]
             ob_batch, ac_batch = replay_buffer.observations[indices], replay_buffer.actions[indices]
 
             # take gradient step and log training performance
