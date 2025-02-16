@@ -13,7 +13,7 @@ MAX_VIDEO_LEN = 40  # training loop에서 덮어 쓸 것
 MJ_ENV_NAMES = ['Ant-v4', 'Walker2d-v4', 'HalfCheetah-v4', 'Hopper-v4']
 
 
-def parse_args():
+def parse_args(debug=False):
     parser = argparse.ArgumentParser()
 
     # expert loading (이 script를 실행하는 dir에 따라 설정)
@@ -41,8 +41,7 @@ def parse_args():
     parser.add_argument('--lr', '-lr', type=float, default=5e-3)
 
     # validation
-    parser.add_argument('--eval_batch_size',
-                        type=int, default=1000)  # eval metrics log를 찍을 validation data point의 수
+    parser.add_argument('--eval_batch_size', type=int, default=1000)  # eval metrics log를 찍을 eval transitions의 수
 
     # logging
     parser.add_argument('--video_log_freq', type=int, default=5, help='-1 for not logging video')
@@ -72,5 +71,34 @@ def parse_args():
     logdir = data_path / logdir
     params['logdir'] = str(logdir)
     logdir.mkdir(exist_ok=True)
+
+    if debug:
+        params = {
+            'exp_name': '_debug',
+            'env_name': 'Ant-v4',
+            'do_dagger': True,
+
+            'n_layers': 2,
+            'hidden_size': 64,
+
+            'ep_len': None,
+            'batch_size': 1000,
+            'max_replay_buffer_size': 1000000,
+
+            'n_iter': 2,
+            'num_agent_train_steps_per_iter': 1000,
+            'train_batch_size': 100,
+            'lr': 5e-3,
+
+            'eval_batch_size': 1000,
+
+            'video_log_freq': -1,
+            'scalar_log_freq': 1,
+            'save_params': False,
+
+            'seed': 1,
+            'no_gpu': False,
+            'which_gpu': 0
+        }
 
     return params

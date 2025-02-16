@@ -175,5 +175,5 @@ def run_training_loop(params):
 
 
 if __name__ == "__main__":
-    params = parse_args()
+    params = parse_args(debug=True)
     run_training_loop(params)
