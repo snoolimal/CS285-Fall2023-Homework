@@ -11,7 +11,7 @@ from cs285.infrastructure.utils import Trajs
 
 class Logger:
     """Tensorboard Logger"""
-    def __init__(self, log_dir, n_logged_samples=10, summary_writer=None):
+    def __init__(self, log_dir, n_logged_samples=10):
         self._log_dir = log_dir
         print('------------------------------')
         print('Logging outputs to', log_dir)
