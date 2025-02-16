@@ -72,6 +72,7 @@ def parse_args(debug=False):
     params['logdir'] = str(logdir)
     logdir.mkdir(exist_ok=True)
 
+    # for debugging in PyCharm
     if debug:
         params = {
             'exp_name': '_debug',
