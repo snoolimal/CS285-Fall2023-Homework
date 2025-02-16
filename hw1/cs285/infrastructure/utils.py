@@ -1,4 +1,4 @@
-from typing import TypeAlias, Dict, List, Tuple
+from typing import TypeAlias, Optional, Dict, List, Tuple
 
 from collections import OrderedDict
 import numpy as np
@@ -24,7 +24,7 @@ Trajz: TypeAlias = Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndar
 
 
 def sample_trajectory(
-        env: gym.Env, policy: nn.Module, max_traj_length: int, render: bool = False
+        env: gym.Env, policy: nn.Module, max_traj_length: Optional[int], render: bool = False
 ) -> Traj:
     """
     Current policy를 env에 굴려 rollout 1개를 sampling한다.
@@ -71,7 +71,8 @@ def sample_trajectory(
 
 
 def sample_trajectories(
-        env: gym.Env, policy: nn.Module, min_timesteps_per_batch: int, max_traj_length: int, render: bool = False
+        env: gym.Env, policy: nn.Module,
+        min_timesteps_per_batch: int, max_traj_length: Optional[int], render: bool = False
 ) -> Tuple[Trajs, int]:
     """
     Total timestep이 batch size를 넘어설 때까지 current policy를 env에 굴려 rollouts를 sampling하여 batch를 만든다.
@@ -92,7 +93,8 @@ def sample_trajectories(
 
 
 def sample_n_trajectories(
-        env: gym.Env, policy: nn.Module, ntraj: int, max_traj_length: int, render: bool = False
+        env: gym.Env, policy: nn.Module,
+        ntraj: int, max_traj_length: Optional[int], render: bool = False
 ) -> Trajs:
     """
     Current policy를 env에 굴려 ntraj개의 rollouts를 sampling한다.
