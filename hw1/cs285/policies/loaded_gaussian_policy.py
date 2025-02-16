@@ -1,7 +1,3 @@
-"""
-건드리지 말고 그대로 복붙!
-"""
-
 import pickle
 import numpy as np
 
@@ -18,8 +14,8 @@ def create_linear_layer(W, b) -> nn.Linear:
         in_features,
         out_features,
     )
-    linear_layer.weight.data = ptu.from_numpy(W.T)
-    linear_layer.bias.data = ptu.from_numpy(b[0])
+    linear_layer.weight.data = ptu.to_tensor(W.T)
+    linear_layer.bias.data = ptu.to_tensor(b[0])
     return linear_layer
 
 
@@ -65,8 +61,8 @@ class LoadedGaussianPolicy(BasePolicy, nn.Module):
         self.obs_dim = obsnorm_mean.shape[-1]
         # print('obs', obsnorm_mean.shape, obsnorm_stdev.shape)
 
-        self.obs_norm_mean = nn.Parameter(ptu.from_numpy(obsnorm_mean))
-        self.obs_norm_std = nn.Parameter(ptu.from_numpy(obsnorm_stdev))
+        self.obs_norm_mean = nn.Parameter(ptu.to_tensor(obsnorm_mean))
+        self.obs_norm_std = nn.Parameter(ptu.to_tensor(obsnorm_stdev))
         self.hidden_layers = nn.ModuleList()
 
         # Hidden layers next
@@ -110,7 +106,7 @@ class LoadedGaussianPolicy(BasePolicy, nn.Module):
             observation = obs
         else:
             observation = obs[None, :]
-        observation = ptu.from_numpy(observation.astype(np.float32))
+        observation = ptu.to_tensor(observation.astype(np.float32))
         action = self(observation)
         return ptu.to_numpy(action)
 
