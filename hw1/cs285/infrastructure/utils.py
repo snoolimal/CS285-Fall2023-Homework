@@ -5,17 +5,16 @@ import numpy as np
 import cv2
 
 from torch import nn
-
 import gymnasium as gym
 
 
 """
-                    Single      Single Traj         Batch (size N, flatten)
-action              ac          acs                 actions
-observation         ob          obs                 observations
-reward              rwd         rwds                rewards
-next observation    next_ob     next_obs            next_observations
-terminal            done        dones               terminals
+                    Single              Single Traj                 Batch (size N, concat_flatten_rollouts() 적용)
+action              ac[ac_dim,]         acs[ep_len,ac_dim]          actions[N,ac_dim]
+observation         ob[ob_dim,]         obs[ep_len,ob_dim]          observations[N,ob_dim]
+reward              rwd[scalar]         rwds[ep_len,]               rewards[N,]
+next observation    next_ob[ob_dim,]    next_obs[ep_len,ob_dim]     next_observations[N,ob_dim]
+terminal            done[bool]          dones[ep_len]               terminals[N,]
 """
 
 
@@ -32,7 +31,7 @@ def sample_trajectory(
     """
     obs, acs, rwds, next_obs, dones, image_obs = [], [], [], [], [], []
     steps = 0
-    ob, _ = env.reset()     # ob의 shape은 'env.observation_space.shape'에서 확인 가능
+    ob, _ = env.reset()     # ob_dim은 env.observation_space.shape에서 확인 가능
     while True:
         if render:
             if hasattr(env, 'sim'):
@@ -43,7 +42,7 @@ def sample_trajectory(
                 cv2.resize(img, dsize=(250, 250), interpolation=cv2.INTER_CUBIC)
             )
 
-        ac: np.ndarray = policy.get_action(ob)  # ac의 shape은 'env.action_space.shape'에서 확인 가능
+        ac: np.ndarray = policy.get_action(ob)  # ac_dim은 env.action_space.shape에서 확인 가능
         next_ob, rwd, done, *_ = env.step(ac)
 
         steps += 1
@@ -75,7 +74,7 @@ def sample_trajectories(
         env: gym.Env, policy: nn.Module, min_timesteps_per_batch: int, max_traj_length: int, render: bool = False
 ) -> Tuple[Trajs, int]:
     """
-    Total timestep이 batch size에 도달할 때까지 current policy를 env에 굴려 rollouts를 sampling하여 batch를 만든다.
+    Total timestep이 batch size를 넘어설 때까지 current policy를 env에 굴려 rollouts를 sampling하여 batch를 만든다.
     ---
     Args:
         min_timesteps_per_batch: batch size
@@ -106,7 +105,7 @@ def sample_n_trajectories(
     return trajs
 
 
-def convert_list_of_rollouts(trajs: Trajs, concat_rwds: bool = True) -> Trajz:
+def concat_flatten_rollouts(trajs: Trajs, concat_rwds: bool = True) -> Trajz:
     """
     Rollouts가 담긴 list인 trajs를 각 component별로 concat하고 flatten한다.
     """
@@ -131,7 +130,7 @@ def get_traj_length(traj: Traj) -> int:
 
 def compute_metrics(trajs: Trajs, eval_trajs: Trajs) -> Dict[str, float]:
     """
-    Logging할 scalar metrics를 계산한다.
+    Logging에 사용할, rollouts에서 얻을 수 있는 scalar metrics를 계산한다.
     """
     # return
     train_returns = [traj['rwds'].sum() for traj in trajs]

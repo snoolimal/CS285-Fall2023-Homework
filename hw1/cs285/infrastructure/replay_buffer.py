@@ -24,7 +24,7 @@ class ReplayBuffer:
             self.trajs.append(traj)
 
         # convert new rollouts into their component arrays, and append them onto
-        observations, actions, rewards, next_observations, terminals = convert_list_of_rollouts(trajs, concat_rwds)
+        observations, actions, rewards, next_observations, terminals = concat_flatten_rollouts(trajs, concat_rwds)
 
         # buffer가 완전히 비어 있다면
         if self.observations is None:
