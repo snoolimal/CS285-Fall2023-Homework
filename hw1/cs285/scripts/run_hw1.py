@@ -141,6 +141,7 @@ def run_training_loop(params):
             logger.log_trajs_as_videos(
                 trajs=eval_video_trajs,
                 step=itr,
+                fps=fps,
                 max_videos_to_save=MAX_NVIDEO,
                 video_title='eval_rollouts'
             )
