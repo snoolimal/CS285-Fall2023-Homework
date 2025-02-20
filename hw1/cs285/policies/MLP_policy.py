@@ -33,8 +33,8 @@ def build_mlp(
 class MLPPolicySL(BasePolicy, nn.Module):
     def __init__(
             self,
-            ob_dim: int,
             ac_dim: int,
+            ob_dim: int,
             n_layers: int,
             hidden_size: int,
             lr: float = 1e-4,
@@ -43,8 +43,8 @@ class MLPPolicySL(BasePolicy, nn.Module):
     ):
         super().__init__()
 
-        self.ob_dim = ob_dim
         self.ac_dim = ac_dim
+        self.ob_dim = ob_dim
         self.n_layers = n_layers
         self.hidden_size = hidden_size
         self.lr = lr
