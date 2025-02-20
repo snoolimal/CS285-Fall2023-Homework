@@ -139,7 +139,7 @@ def run_training_loop(params):
             eval_trajs, eval_timeteps_this_batch = utils.sample_trajectories(
                 env, actor, params['eval_batch_size'], params['ep_len']
             )   # buffer에서 가지고 오지 않고 새롭게 sampling
-            print(f"\n--- Using approximately {round(params['eval_batch_size']/params['ep_len'])} eval batches\n")
+            print(f"\n--- Using approximately {round(params['eval_batch_size']/params['ep_len'])} eval batches")
             logs = utils.compute_metrics(trajs, eval_trajs)
 
             # compute additional metrics
