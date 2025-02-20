@@ -2,6 +2,7 @@
 Runs BC and DAgger for hw1.
 """
 
+import warnings
 import pickle
 import numpy as np
 
@@ -139,7 +140,7 @@ def run_training_loop(params):
             eval_trajs, eval_timeteps_this_batch = utils.sample_trajectories(
                 env, actor, params['eval_batch_size'], params['ep_len']
             )   # buffer에서 가지고 오지 않고 새롭게 sampling
-            print(f"\n--- Using approximately {round(params['eval_batch_size']/params['ep_len'])} eval batches")
+            print(f"--- Using approximately {round(params['eval_batch_size']/params['ep_len'])} eval batches")
             logs = utils.compute_metrics(trajs, eval_trajs)
 
             # compute additional metrics
@@ -199,4 +200,5 @@ def main(debug=False):
 
 
 if __name__ == "__main__":
+    warnings.filterwarnings('ignore', category=DeprecationWarning)
     main()
