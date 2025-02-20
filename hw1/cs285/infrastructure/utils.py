@@ -144,16 +144,16 @@ def compute_metrics(train_trajs: Trajs, eval_trajs: Trajs) -> Dict[str, float]:
     # decide what to log
     logs = OrderedDict()
 
-    logs["Eval_AverageReturn"] = np.mean(eval_returns)
-    logs["Eval_StdReturn"] = np.std(eval_returns)
-    logs["Eval_MaxReturn"] = np.max(eval_returns)
-    logs["Eval_MinReturn"] = np.min(eval_returns)
-    logs["Eval_AverageEpLen"] = np.mean(eval_ep_lens)
+    logs['Eval_AverageReturn'] = np.mean(eval_returns)
+    logs['Eval_StdReturn'] = np.std(eval_returns)
+    logs['Eval_MaxReturn'] = np.max(eval_returns)
+    logs['Eval_MinReturn'] = np.min(eval_returns)
+    logs['Eval_AverageEpLen'] = np.mean(eval_ep_lens)
 
-    logs["Train_AverageReturn"] = np.mean(train_returns)
-    logs["Train_StdReturn"] = np.std(train_returns)
-    logs["Train_MaxReturn"] = np.max(train_returns)
-    logs["Train_MinReturn"] = np.min(train_returns)
-    logs["Train_AverageEpLen"] = np.mean(train_ep_lens)
+    logs['Train_AverageReturn'] = np.mean(train_returns)
+    logs['Train_StdReturn'] = np.std(train_returns)
+    logs['Train_MaxReturn'] = np.max(train_returns)
+    logs['Train_MinReturn'] = np.min(train_returns)
+    logs['Train_AverageEpLen'] = np.mean(train_ep_lens)
 
     return logs
