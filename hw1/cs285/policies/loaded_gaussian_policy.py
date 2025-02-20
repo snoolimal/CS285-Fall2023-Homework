@@ -58,7 +58,8 @@ class LoadedGaussianPolicy(BasePolicy, nn.Module):
         obsnorm_stdev = np.sqrt(
             np.maximum(0, obsnorm_meansq - np.square(obsnorm_mean)))
         self.obs_dim = obsnorm_mean.shape[-1]
-        print('obs', obsnorm_mean.shape, obsnorm_stdev.shape)
+        print(f'obsnorm_mean_shape: {obsnorm_mean.shape}\n'
+              f'obsnorm_std_shape: {obsnorm_stdev.shape}')
 
         self.obs_norm_mean = nn.Parameter(ptu.to_tensor(obsnorm_mean))
         self.obs_norm_std = nn.Parameter(ptu.to_tensor(obsnorm_stdev))

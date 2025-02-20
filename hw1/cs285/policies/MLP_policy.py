@@ -123,7 +123,7 @@ class MLPPolicySL(BasePolicy, nn.Module):
             actions_pred = batch action parediction     | [N,ac_dim]
         """
         mean = self.mean_net(observations)  # [N,ac_dim], N개의 training points에 대응하는 (policy dist의) mean vector
-        std = torch.exp(self.logtsd)        # [ac_dim,], N개의 training points에 공통적으로 사용하는 각 차원의 std
+        std = torch.exp(self.logstd)        # [ac_dim,], N개의 training points에 공통적으로 사용하는 각 차원의 std
         dist = MultivariateNormal(mean, scale_tril=torch.diag(std))     # 여기까지는 문제 없이 computation graph가 연결
                                                                         # alt. Normal(mean, std)
         actions = dist.rsample()    # reparameterization trick으로 sample에도 computation graph의 연결 유지
@@ -137,8 +137,18 @@ class MLPPolicySL(BasePolicy, nn.Module):
         Returns:
             ac: single action       | [ac_dim,]
         """
-        ac = self.forward(ptu.to_tensor(ob.reshape(1, *ob.shape)))  # batch form으로
-        return ptu.to_numpy(ac)
+        # ac = self.forward(ptu.to_tensor(ob))
+        # return ptu.to_numpy(ac)
+        ac = self.forward(ptu.to_tensor(ob).unsqueeze(0))  # batch form으로
+        return ptu.to_numpy(ac.squeeze())
+        # ---
+        # ```
+        # ac = self.forward(ptu.to_tensor(ob))
+        # return ptu.to_numpy(ac)
+        # ```
+        # 위와 같이 batch 차원을 명시적으로 추가하지 않아도 build_mlp()로 만든 policy network는 자동으로 차원 처리를 수행해 준다.
+        # 근데 헷갈리니까 batch 차원을 그냥 명시적으로 나타내자.
+        # ---
 
     def save(self, filepath: Union[str, Path]):
         torch.save(self.state_dict(), str(filepath))

@@ -1,4 +1,5 @@
-from typing import TypeAlias, Dict, List, Tuple, Optional
+from typing_extensions import TypeAlias
+from typing import Dict, List, Tuple, Optional
 
 from collections import OrderedDict
 import numpy as np
@@ -36,7 +37,7 @@ def sample_trajectory(
             if hasattr(env, 'sim'):
                 img = env.sim.render(camera_name='track', height=500, width=500)[::-1]
             else:
-                img = env.render()  # 'rgb_array' mode
+                img = env.render()
             image_obs.append(
                 cv2.resize(img, dsize=(250, 250), interpolation=cv2.INTER_CUBIC)
             )

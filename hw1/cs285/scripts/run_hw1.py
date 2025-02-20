@@ -29,14 +29,14 @@ def run_training_loop(params):
     )
 
     # create logger
-    logger = Logger(params['log_dir'])
+    logger = Logger(params['logdir'])
 
     ### ENVIRONMENT ###
-    env = gym.make(params['env_name'], render_mode=None)    # make the gym env
-    _, _ = env.reset(seed=seed)                             # reset the env (to the init ob and info)
+    env = gym.make(params['env_name'], render_mode='rgb_array')             # video rendering을 위해 다른 mode는 x
+    _, _ = env.reset(seed=seed)                                             # reset the env (to the init ob and info)
 
     # max length for episodes
-    params['ep_len'] = params['ep_len'] or env.spec.max_episode_steps
+    params['ep_len'] = params['ep_len'] or env.spec.max_episode_steps   # parsing하지 않으면 env의 setting으로
     MAX_VIDEO_LEN = params['ep_len']
 
     # env attributes
@@ -62,7 +62,7 @@ def run_training_loop(params):
     )
 
     ### EXPERT ###
-    print('Loading expert polify from...', params['expert_policy_file'])
+    print('\nLoading expert polify from...', params['expert_policy_file'])
     expert_policy = LoadedGaussianPolicy(params['expert_policy_file'])
     expert_policy.to(ptu.device)
     print('Done restoring expert policy.')
@@ -74,14 +74,18 @@ def run_training_loop(params):
     total_timesteps = 0
     start_time = time.time()
 
-    for itr in range(params['iter']):
-        print(f'\n\n********** Iteration %{itr} ************')
+    for itr in range(params['n_iter']):
+        print(f"\n********** Iteration {itr + 1} / {params['n_iter']} ************")
 
         ## Data Collection (Rolling Out)
-        print('\nCollecting data to be used for training...')
+        print(f"\nCollecting data to be used for training from... {params['expert_data']}")
         # BC training under expert data
         if itr == 0:
             trajs = pickle.load(open(params['expert_data'], 'rb'))
+            print(f'Get the list of {len(trajs)} expert policies.')
+            _name_rules = ['obs', 'acs', 'rwds', 'next_obs', 'dones']
+            trajs = [dict(zip(_name_rules, trajs[i].values())) for i in range(len(trajs))]
+
             timesteps_this_batch = 0
         # DAgger training under sampled data (from policy) relabeled by expert
         else:
@@ -117,10 +121,10 @@ def run_training_loop(params):
 
         if log_video:
             # save eval rollouts as videos in tensorboard event file
-            print('\nCollecting video of evaluation rollouts...')
+            print('Collecting video of evaluation rollouts...')
             eval_video_trajs = utils.sample_n_trajectories(
                 env, actor, MAX_NVIDEO, MAX_VIDEO_LEN, True
-            )   # evaluation batch는 1개만 사용
+            )
             logger.log_trajs_as_videos(
                 trajs=eval_video_trajs,
                 step=itr,
@@ -131,10 +135,11 @@ def run_training_loop(params):
 
         if log_metrics:
             # get eval metrics from (eval) transitions
-            print('\nCollecting eval rollouts...')
+            print('Collecting evaluation rollouts...')
             eval_trajs, eval_timeteps_this_batch = utils.sample_trajectories(
                 env, actor, params['eval_batch_size'], params['ep_len']
             )   # buffer에서 가지고 오지 않고 새롭게 sampling
+            print(f"\n--- Using approximately {round(params['eval_batch_size']/params['ep_len'])} eval batches\n")
             logs = utils.compute_metrics(trajs, eval_trajs)
 
             # compute additional metrics
@@ -146,14 +151,14 @@ def run_training_loop(params):
             # perform the logging
             for key, value in logs.items():
                 print('{}: {}'.format(key, value))
-                logger.log_scalar(value, key, iter)
-            print('Done logging. \n\n')
+                logger.log_scalar(value, key, itr)
+            print('--- Done logging.\n')
 
             logger.flush()
 
         if params['save_params']:
-            print('\n Saving agent params.')
-            filepath = str(Path(params['log_dir']) / f'policy_itr_{itr}')
+            print('\nAgent params saved.')
+            filepath = str(Path(params['logdir']) / f'policy_itr_{itr}')
             actor.save(filepath)
 
 
@@ -167,18 +172,18 @@ def main(debug=False):
             'do_dagger': True,
 
             'n_layers': 2,
-            'hidden_size': 64,
+            'hidden_size': 32,
 
-            'ep_len': None,
-            'batch_size': 1000,
-            'max_replay_buffer_size': 1000000,
+            'ep_len': 10,
+            'batch_size': 20,
+            'max_replay_buffer_size': 500,
 
-            'n_iter': 2,
-            'num_agent_train_steps_per_iter': 1000,
-            'train_batch_size': 100,
+            'n_iter': 4,
+            'num_agent_train_steps_per_iter': 3,
+            'train_batch_size': 10,
             'lr': 5e-3,
 
-            'eval_batch_size': 1000,
+            'eval_batch_size': 10,
 
             'video_log_freq': -1,
             'scalar_log_freq': 1,

@@ -26,6 +26,11 @@ def parse_args():
     parser.add_argument('--video_log_freq', type=int, default=5, help='-1 for not logging video')
     parser.add_argument('--scalar_log_freq', type=int, default=1)
 
+    # policy
+    parser.add_argument('--n_layers', type=int, default=2)
+    parser.add_argument('--hidden_size', type=int, default=64)
+    parser.add_argument('--lr', '-lr', type=float, default=5e-3)
+
     # rolling out (data collection)
     parser.add_argument('--ep_len', type=int)                       # (sampling할) trajectory의 길이 제한
     parser.add_argument('--batch_size', type=int, default=1000)     # 전체 (rollouts의) transitions의 수
@@ -36,7 +41,6 @@ def parse_args():
                         help='1 for Vanila BC, otherwise num of DAgger iteration')
     parser.add_argument('--num_agent_train_steps_per_iter', type=int, default=1000)     # iter마다 사용할 batch의 수
     parser.add_argument('--train_batch_size', type=int, default=100)
-    parser.add_argument('--lr', '-lr', type=float, default=5e-3)
 
     # validation
     parser.add_argument('--eval_batch_size', type=int, default=1000)
@@ -54,10 +58,10 @@ def parse_args():
 def add_directories(params):
     # get expert-related directories
     _cs285 = Path(__file__).resolve().parents[1]
-    _expert_policy = params['env_name'].split('-')[0]
+    _expert_policy = params['env_name'].split('-')[0] + '.pkl'
 
     params['expert_policy_file'] = str(_cs285 / 'policies' / 'experts' / _expert_policy)
-    params['expert_data'] = str(_cs285 / 'expert_data' / f"expert_data_{params['env_name']}")
+    params['expert_data'] = str(_cs285 / 'expert_data' / f"expert_data_{params['env_name']}.pkl")
 
     # create log directory
     if params['do_dagger']:
@@ -69,9 +73,9 @@ def add_directories(params):
         assert params['n_iter'] == 1, "Vanilla behavior cloning collects expert data just once (n_iter=1)."
     data_path = _cs285 / 'data'
     data_path.mkdir(exist_ok=True)
-    log_dir = logdir_prefix + params['exp_name'] + '_' + params['env_name'] + '_' + time.strftime("%d-%m-%Y_%H-%M-%S")
-    log_dir = data_path / log_dir
-    log_dir.mkdir(exist_ok=True)
-    params['log_dir'] = str(log_dir)
+    logdir = logdir_prefix + params['exp_name'] + '_' + params['env_name'] + '_' + time.strftime("%d-%m-%Y_%H-%M-%S")
+    logdir = data_path / logdir
+    logdir.mkdir(exist_ok=True)
+    params['logdir'] = str(logdir)
 
     return params

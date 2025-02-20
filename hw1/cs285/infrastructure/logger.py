@@ -11,13 +11,13 @@ from cs285.infrastructure.utils import Trajs
 
 class Logger:
     """Tensorboard Logger"""
-    def __init__(self, log_dir: str | Path, n_logged_samples=10):
-        self._log_dir = Path(log_dir)
+    def __init__(self, logdir: str | Path, n_logged_samples=10):
+        self._logdir = Path(logdir)
         print('------------------------------')
-        print(f'Logging outputs to {log_dir}')
+        print(f'Logging outputs to {logdir}')
         print('------------------------------')
         self._n_logged_samples = n_logged_samples
-        self._summ_writer = SummaryWriter(log_dir, flush_secs=1, max_queue=1)
+        self._summ_writer = SummaryWriter(logdir, flush_secs=1, max_queue=1)
 
     def log_scalar(self, scalar, name, step_):
         self._summ_writer.add_scalar('{}'.format(name), scalar, step_)
@@ -68,7 +68,7 @@ class Logger:
         self.log_video(videos, video_title, step, fps=fps)
 
     def dump_scalars(self, log_path: str | Path = None):
-        log_path = str(self._log_dir / 'scalar_data.json') if log_path is None else str(log_path)
+        log_path = str(self._logdir / 'scalar_data.json') if log_path is None else str(log_path)
         self._summ_writer.export_scalars_to_json(log_path)
 
     def flush(self):
