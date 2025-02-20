@@ -41,7 +41,7 @@ def run_training_loop(params):
 
     # env attributes
     assert isinstance(env.action_space, gym.spaces.Box), ("Action space must be continous,"
-                                                          "i.e., policy is contionous (conditoonal) distribution.")
+                                                          "i.e., policy is contionous (conditional) distribution.")
     ob_dim = env.observation_space.shape[0]     # condition random variable의 차원
     ac_dim = env.action_space.shape[0]          # random variable의 차원
 
