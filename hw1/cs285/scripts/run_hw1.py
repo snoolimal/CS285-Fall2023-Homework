@@ -5,6 +5,7 @@ Runs BC and DAgger for hw1.
 import warnings
 import pickle
 import numpy as np
+import pandas as pd
 
 import torch
 
@@ -150,12 +151,16 @@ def run_training_loop(params):
             if itr == 0: logs['Initial_DataCollection_AverageReturn'] = logs['Train_AverageReturn']
 
             # perform the logging
-            for key, value in logs.items():
-                print('{}: {}'.format(key, value))
-                logger.log_scalar(value, key, itr)
+            if params['n_iter'] == 1:
+                scalar_table = pd.DataFrame(logs.items(), columns=['metric', 'value'])
+                print(scalar_table)
+                scalar_table.to_json(str(Path(params['logdir']) / 'scalar_table.json'), orient='split')
+            else:
+                for key, value in logs.items():
+                    print('{}: {}'.format(key, value))
+                    logger.log_scalar(value, key, itr)
+                logger.flush()
             print('--- Done logging.\n')
-
-            logger.flush()
 
         if params['save_params']:
             print('\nAgent params saved.')
@@ -170,25 +175,26 @@ def main(debug=False):
         params = {
             'exp_name': '_debug',
             'env_name': 'Ant-v4',
-            'do_dagger': True,
+            'do_dagger': False,
+
+            'n_iter': 1,
+            'ep_len': 1000,
+
+            'batch_size': 1000,
+            'max_replay_buffer_size': 1000000,
+
+            'num_agent_train_steps_per_iter': 1000,
+            'train_batch_size': 100,
+
+            'eval_batch_size': 5000,
 
             'n_layers': 2,
-            'hidden_size': 32,
-
-            'ep_len': 10,
-            'batch_size': 20,
-            'max_replay_buffer_size': 500,
-
-            'n_iter': 4,
-            'num_agent_train_steps_per_iter': 3,
-            'train_batch_size': 10,
+            'hidden_size': 64,
             'lr': 5e-3,
 
-            'eval_batch_size': 10,
-
+            'save_params': False,
             'video_log_freq': -1,
             'scalar_log_freq': 1,
-            'save_params': False,
 
             'seed': 1,
             'no_gpu': False,
@@ -201,4 +207,4 @@ def main(debug=False):
 
 if __name__ == "__main__":
     warnings.filterwarnings('ignore', category=DeprecationWarning)
-    main()
+    main(debug=True)

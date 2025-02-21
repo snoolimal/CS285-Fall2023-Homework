@@ -6,7 +6,6 @@ import argparse
 import time
 from pathlib import Path
 
-
 MAX_NVIDEO = 2      # tensorboard에 video로 저장할 rollouts의 수
 MAX_VIDEO_LEN = 40  # training loop에서 덮어 쓸 것
 
