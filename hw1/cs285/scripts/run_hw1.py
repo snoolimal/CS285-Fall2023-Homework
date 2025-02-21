@@ -207,4 +207,4 @@ def main(debug=False):
 
 if __name__ == "__main__":
     warnings.filterwarnings('ignore', category=DeprecationWarning)
-    main(debug=True)
+    main()
