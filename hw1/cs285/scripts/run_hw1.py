@@ -34,7 +34,7 @@ def run_training_loop(params):
     logger = Logger(params['logdir'])
 
     ### ENVIRONMENT ###
-    env = gym.make(params['env_name'], render_mode='rgb_array')             # video rendering을 위해 다른 mode는 x
+    env = gym.make(params['env_name'], render_mode='rgb_array')             # video rendering을 위해 다른 mode는 X
     _, _ = env.reset(seed=seed)                                             # reset the env (to the init ob and info)
 
     # max length for episodes
