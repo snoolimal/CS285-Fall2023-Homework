@@ -2,17 +2,17 @@
 
 ## 2. Editing Code
 Done.
-```
+```shell
 $env:PYTHONPATH = "C:\Users\soono\OneDrive\Ongoing\CS285-Fall2023-Homework\hw1"
 ```
 ## 3. Behavior Cloning
 
 ### Ant
-```
+```shell
 python hw1/cs285/scripts/run_hw1.py `
---env_name Ant-v4 --exp_name bc_ant `
---ep_len 1000 --eval_batch_size 5000 `
---video_log_freq -1
+    --env_name Ant-v4 --exp_name bc_ant `
+    --ep_len 1000 --eval_batch_size 5000 `
+    --video_log_freq -1
 ```
 |                 Metric                 |         Value         |
 |:--------------------------------------:|:---------------------:|
@@ -35,12 +35,12 @@ python hw1/cs285/scripts/run_hw1.py `
 ## 4. DAgger
 
 ### Ant
-```
+```shell
 python hw1/cs285/scripts/run_hw1.py `
---env_name Ant-v4 --exp_name dagger_ant --do_dagger `
---n_iter 10 --ep_len 1000 --eval_batch_size 5000 `
---video_log_freq -1
+  --env_name Ant-v4 --exp_name dagger_ant --do_dagger `
+  --n_iter 10 --ep_len 1000 --eval_batch_size 5000 `
+  --video_log_freq -1
 ```
-```
+```shell
 tensorboard --logdir C:\Users\soono\OneDrive\Ongoing\CS285-Fall2023-Homework\hw1\run_logs
 ```
